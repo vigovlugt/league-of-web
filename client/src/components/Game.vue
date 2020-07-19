@@ -28,6 +28,7 @@ export default {
   },
   methods: {
     onState(data) {
+      console.log(data.gameObjects);
       this.gameObjects = data.gameObjects;
     },
     onAppMounted(app) {

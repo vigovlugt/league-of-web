@@ -10,7 +10,7 @@ export default class EffectManager {
     const graphics = new Graphics();
     graphics.lineStyle(3, 0x33ff33, 1);
     graphics.beginFill(0, 0);
-    graphics.drawEllipse(0, 0, 20, 10);
+    graphics.drawEllipse(0, 0, 20, 15);
     graphics.endFill();
 
     graphics.x = x;

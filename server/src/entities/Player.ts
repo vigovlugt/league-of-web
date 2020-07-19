@@ -2,20 +2,27 @@ import WebSocket, { Data } from "ws";
 import GameObject from "./GameObject";
 import NetworkManager from "../managers/NetworkManager";
 import GameManager from "../managers/GameManager";
-import { lerp } from "../utils/movement";
+import IVector2 from "../interfaces/IVector";
+
+const MOVEMENT_SPEED_MULTIPLIER = 0.01;
 
 export default class Player extends GameObject {
   public champion: string;
 
-  public targetX: number | null = null;
-  public targetY: number | null = null;
+  public stats: { [key: string]: number };
+
+  public target: IVector2 | null = null;
 
   public socket: WebSocket;
 
   constructor(x: number, y: number, socket: WebSocket) {
     super("PLAYER", x, y);
 
-    this.champion = "RED";
+    this.champion = "Lux";
+    this.stats = GameManager.instance.dataManager.getChampionStats(
+      this.champion
+    );
+
     this.socket = socket;
 
     socket.on("close", () => this.onLeave());
@@ -33,14 +40,27 @@ export default class Player extends GameObject {
   }
 
   onMoveCommand(x: number, y: number) {
-    this.targetX = x;
-    this.targetY = y;
+    this.target = { x, y };
   }
 
   update(delta: number) {
-    if (this.targetX != null && this.targetY != null) {
-      this.x = lerp(this.x, this.targetX, delta);
-      this.y = lerp(this.y, this.targetY, delta);
+    this.move(delta);
+  }
+
+  move(delta: number) {
+    if (this.target != null) {
+      const speed = this.stats.movespeed * MOVEMENT_SPEED_MULTIPLIER;
+
+      const distanceX = this.target.x - this.x;
+      const distanceY = this.target.y - this.y;
+      if (Math.abs(distanceX) + Math.abs(distanceY) < 5) {
+        this.target = null;
+        return;
+      }
+
+      const direction = Math.atan2(distanceY, distanceX);
+      this.x += speed * Math.cos(direction);
+      this.y += speed * Math.sin(direction);
     }
   }
 
