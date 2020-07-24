@@ -3,8 +3,12 @@ import GameObject from "../entities/GameObject";
 export default class GameObjectManager {
   private gameObjects: GameObject[] = [];
 
-  public getGameObjects() {
+  public getAll() {
     return this.gameObjects;
+  }
+
+  public get(id: string) {
+    return this.gameObjects.find((go) => go.id === id);
   }
 
   public create(gameObject: GameObject) {

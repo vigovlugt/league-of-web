@@ -1,6 +1,8 @@
 import WebSocket, { Server, Data } from "ws";
 
 import IEventListener from "../interfaces/IEventListener";
+import { IncomingMessage } from "http";
+import IMessage from "../interfaces/IMessage";
 
 export default class NetworkManager {
   private server: Server;
@@ -12,21 +14,23 @@ export default class NetworkManager {
       console.log("Listening on :3001")
     );
 
-    this.server.on("connection", (socket, req) => this.onConnection(socket));
+    this.server.on("connection", (socket, req) =>
+      this.onConnection(socket, req)
+    );
   }
 
-  private onConnection(socket: WebSocket) {
-    this.messageHandler("connection", socket);
-
-    socket.on("message", (message: Data) => {
-      const parsedMessage = NetworkManager.parseMessage(message);
-      this.messageHandler(parsedMessage.type, parsedMessage.data);
-    });
+  private onConnection(socket: WebSocket, req: IncomingMessage) {
+    this.messageHandler("connection", { socket, req });
   }
 
   public static parseMessage(message: Data) {
     const parsedMessage = JSON.parse(message as string);
     return parsedMessage;
+  }
+
+  public static serializeMessage(message: IMessage) {
+    const serialized = JSON.stringify(message);
+    return serialized;
   }
 
   private messageHandler(type: string, data: any) {
@@ -41,10 +45,14 @@ export default class NetworkManager {
   }
 
   public send(type: string, data: any) {
-    const message = { type, data };
     this.server.clients.forEach((socket) => {
       if (socket.readyState !== WebSocket.OPEN) return;
-      socket.send(JSON.stringify(message));
+      this.sendToSocket(socket, type, data);
     });
+  }
+
+  public sendToSocket(socket: WebSocket, type: string, data: any) {
+    const message = { type, data };
+    socket.send(JSON.stringify(message));
   }
 }

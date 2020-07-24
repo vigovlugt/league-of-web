@@ -1,39 +1,16 @@
 <template>
-  <Renderer @appMounted="onAppMounted">
-    <GameObject v-for="go in gameObjects" :key="go.id" v-bind="go" />
-  </Renderer>
+  <div class="app-container"></div>
 </template>
 
 <script>
-import Renderer from "./Renderer.vue";
-import GameObject from "./GameObject.vue";
-
 import GameManager from "../managers/GameManager";
 
 export default {
-  components: {
-    Renderer,
-    GameObject,
+  mounted() {
+    GameManager.init(this.$el);
   },
-  data() {
-    new GameManager();
-
-    GameManager.instance.networkManager.on("STATE", (data) =>
-      this.onState(data)
-    );
-
-    return {
-      gameObjects: [],
-    };
-  },
-  methods: {
-    onState(data) {
-      console.log(data.gameObjects);
-      this.gameObjects = data.gameObjects;
-    },
-    onAppMounted(app) {
-      GameManager.instance.onAppMounted(app);
-    },
+  beforeUnmount() {
+    GameManager.stop();
   },
 };
 </script>

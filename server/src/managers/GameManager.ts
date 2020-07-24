@@ -1,48 +1,46 @@
 import Player from "../entities/Player";
 import NetworkManager from "./NetworkManager";
-import WebSocket, { Data } from "ws";
+import WebSocket from "ws";
 import GameObjectManager from "./GameObjectManager";
 import DataManager from "./DataManager";
+import { IncomingMessage } from "http";
 
 const TICKS = 64;
 
 export default class GameManager {
   public static instance: GameManager;
 
-  public networkManager: NetworkManager;
-  public gameObjectManager: GameObjectManager;
-  public dataManager: DataManager;
+  public static networkManager: NetworkManager;
+  public static gameObjectManager: GameObjectManager;
+  public static dataManager: DataManager;
 
-  private updateInterval: NodeJS.Timeout | null = null;
+  private static updateInterval: NodeJS.Timeout | null = null;
 
-  private lastUpdate: number = Date.now();
+  private static lastUpdate: number = Date.now();
 
-  constructor() {
-    GameManager.instance = this;
+  public static async init() {
+    this.dataManager = new DataManager();
+
+    await this.dataManager.loadData();
 
     this.networkManager = new NetworkManager();
     this.gameObjectManager = new GameObjectManager();
-    this.dataManager = new DataManager();
 
-    this.dataManager.loadData();
-
-    this.networkManager.on("connection", (socket: WebSocket) =>
-      this.onJoin(socket)
+    this.networkManager.on(
+      "connection",
+      ({ socket }: { socket: WebSocket; req: IncomingMessage }) =>
+        this.onConnect(socket)
     );
   }
 
-  onJoin(socket: WebSocket) {
-    const player = new Player(10, 10, socket);
-
-    this.gameObjectManager.create(player);
+  private static onConnect(socket: WebSocket) {
+    const player = new Player(socket);
 
     this.start();
-
-    console.log("JOIN: ", player.id);
-    this.logState();
+    console.log("CONNECT: ", player.id);
   }
 
-  start() {
+  private static start() {
     if (this.updateInterval !== null) return;
     this.lastUpdate = Date.now();
     this.updateInterval = setInterval(
@@ -51,21 +49,21 @@ export default class GameManager {
     );
   }
 
-  update(delta: number) {
-    this.gameObjectManager.getGameObjects().forEach((go) => go.update(delta));
+  private static update(delta: number) {
+    this.gameObjectManager.getAll().forEach((go) => go.update(delta));
 
     this.sendState();
 
     this.lastUpdate = Date.now();
   }
 
-  sendState() {
+  private static sendState() {
     this.networkManager.send("STATE", {
       gameObjects: this.gameObjectManager.serialize(),
     });
   }
 
-  logState() {
+  public static logState() {
     console.log("--------------------------");
     console.log(this.gameObjectManager.getPlayers().length, "PLAYERS");
     console.log("--------------------------");

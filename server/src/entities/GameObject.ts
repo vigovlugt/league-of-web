@@ -1,36 +1,65 @@
 import { v4 as uuidv4 } from "uuid";
 import GameManager from "../managers/GameManager";
+import IVector2 from "../interfaces/IVector";
+import Component from "../components/Component";
 
 export default class GameObject {
   public id: string;
-
   public type: string;
 
-  public x: number;
-  public y: number;
+  public position: IVector2;
 
-  constructor(type: string, x: number, y: number) {
+  private components: Component[] = [];
+
+  protected spawned: boolean = false;
+
+  constructor(type: string, position: IVector2) {
     this.id = uuidv4();
 
     this.type = type;
 
-    this.x = x;
-    this.y = y;
+    this.position = position;
+  }
+
+  public addComponent(component: Component) {
+    this.components.push(component);
+  }
+
+  public getComponent<T extends Component>(constr: {
+    new (...args: any[]): T;
+  }): T | undefined {
+    const component = this.components.find((c) => c instanceof constr);
+
+    if (component == undefined) {
+      return component;
+    }
+
+    return component as T;
+  }
+
+  public update(delta: number) {
+    this.components.forEach((c) => c.update(delta));
   }
 
   public serialize() {
-    const { id, type, x, y } = this;
-    return {
-      id,
-      type,
-      x,
-      y,
-    };
+    const { id, type, position } = this;
+
+    let serialized = { id, type, position };
+
+    this.components.forEach((c) => {
+      serialized = { ...serialized, ...c.serialize() };
+    });
+
+    return serialized;
   }
 
-  public update(delta: number) {}
+  public spawn() {
+    this.spawned = true;
+    GameManager.gameObjectManager.create(this);
+  }
 
   public destroy() {
-    GameManager.instance.gameObjectManager.remove(this.id);
+    this.spawned = false;
+    GameManager.gameObjectManager.remove(this.id);
   }
 }

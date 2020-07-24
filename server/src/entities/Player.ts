@@ -3,25 +3,33 @@ import GameObject from "./GameObject";
 import NetworkManager from "../managers/NetworkManager";
 import GameManager from "../managers/GameManager";
 import IVector2 from "../interfaces/IVector";
-
-const MOVEMENT_SPEED_MULTIPLIER = 0.01;
+import MoveCommand from "../commands/MoveCommand";
+import PlayerState from "../models/state/player/PlayerState";
+import AttackCommand from "../commands/AttackCommand";
+import AbilityCommand from "../commands/AbilityCommand";
+import IdleState from "../models/state/player/IdleState";
+import PlayerStats from "../models/stats/PlayerStats";
+import HealthComponent from "../components/HealthComponent";
+import AttackComponent from "../components/AttackComponent";
+import MoveComponent from "../components/MoveComponent";
+import RangedAttackComponent from "../components/RangedAttackComponent";
+import IJoinData from "../interfaces/IJoinData";
+import AbilityComponent from "../components/AbilityComponent";
 
 export default class Player extends GameObject {
-  public champion: string;
+  public name: string = "";
+  public champion: string | null = null;
 
-  public stats: { [key: string]: number };
+  public stats: PlayerStats | null = null;
+  public state: PlayerState = new IdleState(this);
 
   public target: IVector2 | null = null;
+  public attackCooldown: number = 0;
 
   public socket: WebSocket;
 
-  constructor(x: number, y: number, socket: WebSocket) {
-    super("PLAYER", x, y);
-
-    this.champion = "Lux";
-    this.stats = GameManager.instance.dataManager.getChampionStats(
-      this.champion
-    );
+  constructor(socket: WebSocket) {
+    super("PLAYER", { x: 0, y: 0 });
 
     this.socket = socket;
 
@@ -32,41 +40,75 @@ export default class Player extends GameObject {
 
   onMessage(message: Data) {
     const { type, data } = NetworkManager.parseMessage(message);
+
+    if (type !== "JOIN" && !this.spawned) return;
+
     switch (type) {
+      case "JOIN":
+        this.onJoin(data);
+        break;
       case "MOVE":
-        this.onMoveCommand(data.x, data.y);
+        const moveCommand = new MoveCommand(data);
+        this.state = this.state.onMove(moveCommand);
+        break;
+      case "ATTACK":
+        const attackCommand = new AttackCommand(data.targetId);
+        this.state = this.state.onAttack(attackCommand);
+        break;
+      case "ABILITY":
+        const abilityCommand = new AbilityCommand(data.ability);
+        this.state = this.state.onAbility(abilityCommand);
         break;
     }
   }
 
-  onMoveCommand(x: number, y: number) {
-    this.target = { x, y };
-  }
-
   update(delta: number) {
-    this.move(delta);
+    this.state = this.state.update(delta);
+    super.update(delta);
   }
 
-  move(delta: number) {
-    if (this.target != null) {
-      const speed = this.stats.movespeed * MOVEMENT_SPEED_MULTIPLIER;
+  onJoin(data: IJoinData) {
+    this.name = data.name;
+    this.stats = new PlayerStats(data.champion);
 
-      const distanceX = this.target.x - this.x;
-      const distanceY = this.target.y - this.y;
-      if (Math.abs(distanceX) + Math.abs(distanceY) < 5) {
-        this.target = null;
-        return;
-      }
-
-      const direction = Math.atan2(distanceY, distanceX);
-      this.x += speed * Math.cos(direction);
-      this.y += speed * Math.sin(direction);
+    this.addComponent(new MoveComponent(this, this.stats.getMovementSpeed()));
+    this.addComponent(new HealthComponent(this, this.stats.base.health));
+    if (this.stats.base.attackRange > 200) {
+      this.addComponent(
+        new RangedAttackComponent(this, this.stats.getAttackDamage())
+      );
+    } else {
+      this.addComponent(
+        new AttackComponent(this, this.stats.getAttackDamage())
+      );
     }
+
+    this.addComponent(new AbilityComponent(this));
+
+    this.position.x = Math.random() * 1000;
+    this.position.y = Math.random() * 1000;
+    super.spawn();
+
+    console.log("JOIN: ", this.id);
+
+    GameManager.networkManager.sendToSocket(this.socket, "JOIN", {
+      id: this.id,
+    });
+  }
+
+  serialize() {
+    const base = super.serialize();
+
+    const { name, champion } = this;
+
+    const serialized = { ...base, name, champion };
+
+    return serialized;
   }
 
   onLeave() {
     super.destroy();
     console.log("LEAVE: ", this.id);
-    GameManager.instance.logState();
+    GameManager.logState();
   }
 }

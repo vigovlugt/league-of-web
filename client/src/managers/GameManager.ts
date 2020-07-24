@@ -2,25 +2,53 @@ import NetworkManager from "./NetworkManager";
 import { Application } from "pixi.js";
 import InputManager from "./InputManager";
 import EffectManager from "./EffectManager";
+import GameObjectManager from "./GameObjectManager";
+import LoadManager from "./LoadManager";
 
 export default class GameManager {
-  public static instance: GameManager;
+  public static initialized: boolean = false;
 
-  public app: Application;
+  public static app: Application;
 
-  public networkManager: NetworkManager;
-  public inputManager: InputManager;
-  public effectManager: EffectManager;
+  public static loadManager: LoadManager;
+  public static gameObjectManager: GameObjectManager;
+  public static networkManager: NetworkManager;
+  public static inputManager: InputManager;
+  public static effectManager: EffectManager;
 
-  constructor() {
-    GameManager.instance = this;
-    (window as any).gameManager = this;
+  public static async init(element: HTMLElement) {
+    this.initialized = true;
+
+    this.loadManager = new LoadManager();
+
+    await this.loadManager.load();
+
+    this.app = new Application({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    element.appendChild(this.app.view);
+
+    window.addEventListener("resize", () =>
+      this.app.renderer.resize(window.innerWidth, window.innerHeight)
+    );
+
     this.networkManager = new NetworkManager();
+    this.gameObjectManager = new GameObjectManager(
+      this.app,
+      this.networkManager
+    );
+    this.effectManager = new EffectManager(this.app);
+    this.inputManager = new InputManager(
+      this.app,
+      this.networkManager,
+      this.effectManager,
+      this.gameObjectManager
+    );
   }
 
-  public onAppMounted(app: Application) {
-    this.app = app;
-    this.inputManager = new InputManager(app);
-    this.effectManager = new EffectManager(app);
+  public static stop() {
+    this.networkManager.stop();
   }
 }

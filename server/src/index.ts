@@ -1,3 +1,3 @@
 import GameManager from "./managers/GameManager";
 
-new GameManager();
+GameManager.init();
