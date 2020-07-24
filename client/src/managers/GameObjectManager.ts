@@ -1,11 +1,12 @@
 import GameObject from "../entities/GameObject";
 import IGameObject from "../interfaces/IGameObject";
 import NetworkManager from "./NetworkManager";
-import { Application, Graphics, DisplayObject } from "pixi.js";
-import Player from "../entities/Player";
+import { Application, DisplayObject } from "pixi.js";
+import Champion from "../entities/Champion";
 import AutoAttack from "../entities/AutoAttack";
-import IPlayer from "../interfaces/IPlayer";
+import IChampion from "../interfaces/IChampion";
 import GameManager from "./GameManager";
+import Projectile from "../entities/Projectile";
 
 export default class GameObjectManager {
   private gameObjects: GameObject[] = [];
@@ -45,15 +46,19 @@ export default class GameObjectManager {
   }
 
   private spawn(go: IGameObject) {
+    console.log("SPAWN", go.type);
     let gameObject;
     switch (go.type) {
-      case "PLAYER":
+      case "CHAMPION":
         const isLocalPlayer = this.networkManager.playerId === go.id;
 
-        gameObject = new Player(go as IPlayer, isLocalPlayer);
+        gameObject = new Champion(go as IChampion, isLocalPlayer);
         break;
       case "AUTOATTACK":
         gameObject = new AutoAttack(go);
+        break;
+      case "PROJECTILE":
+        gameObject = new Projectile(go);
         break;
     }
 

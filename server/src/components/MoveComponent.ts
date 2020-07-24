@@ -1,14 +1,15 @@
 import Component from "./Component";
 import GameObject from "../entities/GameObject";
 import IVector2 from "../interfaces/IVector";
-import { getDirection, normalize, getDistance } from "../utils/vectors";
-
-type Target = IVector2 | GameObject | null;
+import { getDirection, normalize, getDistance } from "../lib/vectors";
+import Target from "../types/Target";
 
 export default class MoveComponent extends Component {
   private speed: number;
 
   private target: Target = null;
+
+  private direction: IVector2 | null = null;
 
   constructor(go: GameObject, speed: number) {
     super(go);
@@ -16,7 +17,13 @@ export default class MoveComponent extends Component {
   }
 
   public setTarget(target: Target) {
+    this.direction = null;
     this.target = target;
+  }
+
+  public setDirection(direction: IVector2 | null) {
+    this.target = null;
+    this.direction = direction != null ? normalize(direction) : null;
   }
 
   public getTarget() {
@@ -35,7 +42,16 @@ export default class MoveComponent extends Component {
     return this.target;
   }
 
-  public getTranslation(delta: number) {
+  public getDirectionTranslation(delta: number) {
+    if (this.direction == null) return { x: 0, y: 0 };
+
+    return {
+      x: this.direction.x * this.speed * delta,
+      y: this.direction.y * this.speed * delta,
+    };
+  }
+
+  public getTargetTranslation(delta: number) {
     if (this.target == null) return { x: 0, y: 0 };
 
     const targetPosition = this.getTargetPosition()!;
@@ -56,14 +72,23 @@ export default class MoveComponent extends Component {
   }
 
   public update(delta: number) {
-    if (this.target == null) return;
+    let translation;
+    if (this.target != null) {
+      translation = this.getTargetTranslation(delta);
+    } else if (this.direction != null) {
+      translation = this.getDirectionTranslation(delta);
+    }
 
-    const translation = this.getTranslation(delta);
+    if (translation == null) {
+      return;
+    }
 
     this.gameObject.position.x += translation.x;
     this.gameObject.position.y += translation.y;
 
-    this.checkAtTarget();
+    if (this.target != null) {
+      this.checkAtTarget();
+    }
   }
 
   public checkAtTarget() {

@@ -1,7 +1,7 @@
 import MoveCommand from "../../../commands/MoveCommand";
 import AttackCommand from "../../../commands/AttackCommand";
 import AbilityCommand from "../../../commands/AbilityCommand";
-import Player from "../../../entities/Player";
+import Champion from "../../../entities/Champion";
 import IVector2 from "../../../interfaces/IVector";
 import PlayerState from "./PlayerState";
 import GameManager from "../../../managers/GameManager";
@@ -9,6 +9,7 @@ import IdleState from "./IdleState";
 import MoveState from "./MoveState";
 import GameObject from "../../../entities/GameObject";
 import AttackComponent from "../../../components/AttackComponent";
+import AbilityState from "./AbilityState";
 
 enum AttackStateType {
   WINDUP,
@@ -26,24 +27,32 @@ export default class AttackState extends PlayerState {
 
   private attackState: AttackStateType = AttackStateType.WINDUP;
 
-  constructor(player: Player, target: string) {
-    super(player);
+  constructor(champion: Champion, target: string) {
+    super(champion);
     this.target = target;
 
-    this.windUpTime = this.player.stats!.getAttackTime() * WINDUP_MULITPLIER;
+    this.windUpTime = this.champion.stats!.getAttackTime() * WINDUP_MULITPLIER;
     this.windDownTime =
-      this.player.stats!.getAttackTime() * WINDDOWN_MULTIPLIER;
+      this.champion.stats!.getAttackTime() * WINDDOWN_MULTIPLIER;
   }
 
   onMove(moveCommand: MoveCommand): PlayerState {
-    return new MoveState(this.player, moveCommand.target);
+    return new MoveState(this.champion, moveCommand.target);
   }
 
   onAttack(attackCommand: AttackCommand): PlayerState {
-    return new MoveState(this.player, attackCommand.targetId);
+    return new MoveState(this.champion, attackCommand.targetId);
   }
 
   onAbility(abilityCommand: AbilityCommand): PlayerState {
+    const ability = this.champion.abilityComponent.getAbilityByCommand(
+      abilityCommand
+    );
+
+    if (ability.canCast()) {
+      return new AbilityState(this.champion, ability, abilityCommand.target);
+    }
+
     return this;
   }
 
@@ -52,7 +61,7 @@ export default class AttackState extends PlayerState {
 
     const go = GameManager.gameObjectManager.get(this.target);
     if (go == null) {
-      return new IdleState(this.player);
+      return new IdleState(this.champion);
     }
 
     switch (this.attackState) {
@@ -67,10 +76,10 @@ export default class AttackState extends PlayerState {
     this.windUpTime -= delta;
 
     if (this.windUpTime <= 0) {
-      this.player.getComponent(AttackComponent)!.attack(go);
+      this.champion.attackComponent.attack(go);
 
-      this.player.attackCooldown =
-        this.player.stats!.getAttackTime() * (1 - WINDUP_MULITPLIER);
+      this.champion.attackComponent.attackCooldown =
+        this.champion.stats!.getAttackTime() * (1 - WINDUP_MULITPLIER);
 
       this.attackState = AttackStateType.WINDDOWN;
     }
@@ -82,7 +91,7 @@ export default class AttackState extends PlayerState {
     this.windDownTime -= delta;
 
     if (this.windDownTime <= 0) {
-      return new MoveState(this.player, this.target);
+      return new MoveState(this.champion, this.target);
     }
 
     return this;

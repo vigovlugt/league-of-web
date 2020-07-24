@@ -1,9 +1,10 @@
-import Player from "../entities/Player";
+import Champion from "../entities/Champion";
 import NetworkManager from "./NetworkManager";
-import WebSocket from "ws";
+import WebSocket, { Data } from "ws";
 import GameObjectManager from "./GameObjectManager";
 import DataManager from "./DataManager";
 import { IncomingMessage } from "http";
+import ChampionManager from "./ChampionManager";
 
 const TICKS = 64;
 
@@ -13,6 +14,7 @@ export default class GameManager {
   public static networkManager: NetworkManager;
   public static gameObjectManager: GameObjectManager;
   public static dataManager: DataManager;
+  public static championManager: ChampionManager;
 
   private static updateInterval: NodeJS.Timeout | null = null;
 
@@ -25,19 +27,9 @@ export default class GameManager {
 
     this.networkManager = new NetworkManager();
     this.gameObjectManager = new GameObjectManager();
-
-    this.networkManager.on(
-      "connection",
-      ({ socket }: { socket: WebSocket; req: IncomingMessage }) =>
-        this.onConnect(socket)
-    );
-  }
-
-  private static onConnect(socket: WebSocket) {
-    const player = new Player(socket);
+    this.championManager = new ChampionManager(this.networkManager);
 
     this.start();
-    console.log("CONNECT: ", player.id);
   }
 
   private static start() {

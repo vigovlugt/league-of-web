@@ -1,13 +1,13 @@
 import MoveCommand from "../../../commands/MoveCommand";
 import AttackCommand from "../../../commands/AttackCommand";
 import AbilityCommand from "../../../commands/AbilityCommand";
-import Player from "../../../entities/Player";
+import Champion from "../../../entities/Champion";
 
 export default class PlayerState {
-  protected player: Player;
+  protected champion: Champion;
 
-  constructor(player: Player) {
-    this.player = player;
+  constructor(player: Champion) {
+    this.champion = player;
   }
 
   onMove(moveCommand: MoveCommand): PlayerState {
@@ -23,10 +23,6 @@ export default class PlayerState {
   }
 
   update(delta: number): PlayerState {
-    if (this.player.attackCooldown > 0) {
-      this.player.attackCooldown -= delta;
-    }
-
     return this;
   }
 }

@@ -21,8 +21,9 @@ export default class GameObject {
     this.position = position;
   }
 
-  public addComponent(component: Component) {
+  public addComponent<T extends Component>(component: T): T {
     this.components.push(component);
+    return component;
   }
 
   public getComponent<T extends Component>(constr: {

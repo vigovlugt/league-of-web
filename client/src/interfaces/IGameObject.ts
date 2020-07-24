@@ -4,4 +4,5 @@ export default interface IGameObject {
   id: string;
   type: string;
   position: IVector2;
+  radius?:number;
 }

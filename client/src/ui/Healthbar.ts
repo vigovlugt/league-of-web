@@ -1,14 +1,14 @@
 import { Graphics } from "pixi.js";
-import Player from "../entities/Player";
+import Champion from "../entities/Champion";
 import setPivotCenter from "../utils/sprite";
 
 export default class Healthbar {
   private bg: Graphics;
   private hp: Graphics;
 
-  private player: Player;
+  private player: Champion;
 
-  constructor(player: Player) {
+  constructor(player: Champion) {
     this.player = player;
 
     this.bg = new Graphics();

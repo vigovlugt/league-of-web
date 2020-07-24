@@ -1,9 +1,10 @@
 import GameObject from "./GameObject";
-import { Graphics, Rectangle, Text } from "pixi.js";
-import IPlayer from "../interfaces/IPlayer";
+import { Graphics, Text, Circle } from "pixi.js";
+import IChampion from "../interfaces/IChampion";
 import Healthbar from "../ui/Healthbar";
+import setPivotCenter from "../utils/sprite";
 
-export default class Player extends GameObject {
+export default class Champion extends GameObject {
   private name: string;
   private champion: string;
 
@@ -16,7 +17,7 @@ export default class Player extends GameObject {
 
   targetable = true;
 
-  constructor(go: IPlayer, isLocalPlayer: boolean) {
+  constructor(go: IChampion, isLocalPlayer: boolean) {
     super(go);
 
     this.name = go.name;
@@ -34,9 +35,9 @@ export default class Player extends GameObject {
 
     graphics.lineStyle(3, color, 1);
     graphics.beginFill(0, 0);
-    graphics.drawRect(-25, -65, 50, 75);
+    graphics.drawCircle(0, 0, go.radius!);
     graphics.endFill();
-    graphics.hitArea = new Rectangle(-25, -65, 50, 75);
+    graphics.hitArea = new Circle(0, 0, go.radius);
 
     this.sprite = graphics;
 
@@ -53,7 +54,7 @@ export default class Player extends GameObject {
     this.healthBar = new Healthbar(this);
   }
 
-  sync(player: IPlayer) {
+  sync(player: IChampion) {
     super.sync(player);
 
     if (this.health != player.health || this.maxHealth != player.maxHealth) {

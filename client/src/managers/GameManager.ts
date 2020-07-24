@@ -28,6 +28,8 @@ export default class GameManager {
       height: window.innerHeight,
     });
 
+    // this.app.stage.scale.set(0.5);
+
     element.appendChild(this.app.view);
 
     window.addEventListener("resize", () =>

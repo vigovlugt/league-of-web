@@ -53,7 +53,7 @@ export default class InputManager {
         return;
       }
     }
-    const { x, y } = event.data.global;
+    const { x, y } = this.interaction.mouse.getLocalPosition(this.app.stage);
 
     this.networkManager.send("MOVE", { x, y });
 
@@ -62,7 +62,11 @@ export default class InputManager {
 
   onKeyDown(event: KeyboardEvent) {
     if (["q", "w", "e", "r"].includes(event.key)) {
-      this.networkManager.send("ABILITY", { ability: event.key });
+      const mousePos = this.interaction.mouse.getLocalPosition(this.app.stage);
+      this.networkManager.send("ABILITY", {
+        ability: event.key,
+        target: { x: mousePos.x, y: mousePos.y },
+      });
     }
   }
 }

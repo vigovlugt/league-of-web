@@ -19,7 +19,7 @@ export default class AutoAttack extends GameObject {
     this.target = target;
     this.damage = damage;
 
-    this.moveComponent = new MoveComponent(this, 1000);
+    this.moveComponent = new MoveComponent(this, SPEED);
     this.addComponent(this.moveComponent);
     this.moveComponent.setTarget(target);
   }

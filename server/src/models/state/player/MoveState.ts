@@ -1,35 +1,41 @@
 import MoveCommand from "../../../commands/MoveCommand";
 import AttackCommand from "../../../commands/AttackCommand";
 import AbilityCommand from "../../../commands/AbilityCommand";
-import Player from "../../../entities/Player";
+import Champion from "../../../entities/Champion";
 import PlayerState from "./PlayerState";
 import IVector2 from "../../../interfaces/IVector";
 import GameManager from "../../../managers/GameManager";
 import IdleState from "./IdleState";
 import AttackState from "./AttackState";
-import { getDistance } from "../../../utils/vectors";
+import { getDistance } from "../../../lib/vectors";
 import MoveComponent from "../../../components/MoveComponent";
-
-const IDLE_DISTANCE = 3;
+import AbilityState from "./AbilityState";
 
 export default class MoveState extends PlayerState {
   private target: IVector2 | string;
 
-  constructor(player: Player, target: IVector2 | string) {
-    super(player);
+  constructor(champion: Champion, target: IVector2 | string) {
+    super(champion);
     this.target = target;
   }
 
   onMove(moveCommand: MoveCommand): PlayerState {
-    this.target = moveCommand.target;
-    return this;
+    return new MoveState(this.champion, moveCommand.target);
   }
 
   onAttack(attackCommand: AttackCommand): PlayerState {
-    return new MoveState(this.player, attackCommand.targetId);
+    return new MoveState(this.champion, attackCommand.targetId);
   }
 
   onAbility(abilityCommand: AbilityCommand): PlayerState {
+    const ability = this.champion.abilityComponent.getAbilityByCommand(
+      abilityCommand
+    );
+
+    if (ability.canCast()) {
+      return new AbilityState(this.champion, ability, abilityCommand.target);
+    }
+
     return this;
   }
 
@@ -53,16 +59,16 @@ export default class MoveState extends PlayerState {
 
     const targetPos = this.getTargetPos();
     if (targetPos == null) {
-      return new IdleState(this.player);
+      return new IdleState(this.champion);
     }
 
     const targetIsEnemy = typeof this.target === "string";
 
-    const attackRange = this.player.stats!.getAttackRange();
+    const attackRange = this.champion.stats!.getAttackRange();
 
-    const totalDistance = getDistance(targetPos, this.player.position);
+    const totalDistance = getDistance(targetPos, this.champion.position);
 
-    const moveComponent = this.player.getComponent(MoveComponent)!;
+    const moveComponent = this.champion.getComponent(MoveComponent)!;
 
     moveComponent.setTarget(targetPos);
 
@@ -70,12 +76,12 @@ export default class MoveState extends PlayerState {
       //If in attackrange of enemy
       moveComponent.setTarget(null);
 
-      if (this.player.attackCooldown <= 0) {
-        return new AttackState(this.player, this.target as string);
+      if (this.champion.attackComponent.canAttack()) {
+        return new AttackState(this.champion, this.target as string);
       }
     } else if (!targetIsEnemy && moveComponent.checkAtTarget() == true) {
       //If at target position
-      return new IdleState(this.player);
+      return new IdleState(this.champion);
     }
 
     return this;

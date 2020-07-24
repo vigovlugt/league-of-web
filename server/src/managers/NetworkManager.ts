@@ -20,7 +20,7 @@ export default class NetworkManager {
   }
 
   private onConnection(socket: WebSocket, req: IncomingMessage) {
-    this.messageHandler("connection", { socket, req });
+    this.messageHandler("connection", socket);
   }
 
   public static parseMessage(message: Data) {
