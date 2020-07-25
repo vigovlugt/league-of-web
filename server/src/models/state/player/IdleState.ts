@@ -25,7 +25,7 @@ export default class IdleState extends PlayerState {
       abilityCommand
     );
 
-    if (ability.canCast()) {
+    if (ability && ability.canCast()) {
       return new AbilityState(this.champion, ability, abilityCommand.target);
     }
 

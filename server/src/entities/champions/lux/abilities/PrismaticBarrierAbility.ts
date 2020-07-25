@@ -6,8 +6,9 @@ import Champion from "../../../Champion";
 import LightBinding from "./LightBinding";
 import { getDirection } from "../../../../lib/vectors";
 import IVector2 from "../../../../interfaces/IVector";
+import PrismaticBarrier from "./PrismaticBarrier";
 
-export default class LightBindingAbility extends Ability {
+export default class PrismaticBarrierAbility extends Ability {
   constructor(champion: Champion) {
     super(champion, {
       cooldown: 3,
@@ -19,7 +20,7 @@ export default class LightBindingAbility extends Ability {
   onCast(target: Target) {
     super.onCast(target);
 
-    const projectile = new LightBinding(
+    const projectile = new PrismaticBarrier(
       this.champion,
       getDirection(this.champion.position, target as IVector2)
     );

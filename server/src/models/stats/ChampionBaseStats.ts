@@ -1,4 +1,4 @@
-export default class PlayerBaseStats {
+export default class ChampionBaseStats {
   public movementSpeed: number;
 
   public attackRange: number;
@@ -10,10 +10,10 @@ export default class PlayerBaseStats {
 
   constructor(ddragonStats: { [key: string]: number }) {
     this.movementSpeed = ddragonStats.movespeed;
-
     this.attackRange = ddragonStats.attackrange;
     this.attackSpeed = ddragonStats.attackspeed;
     this.attackDamage = ddragonStats.attackdamage;
+
     this.isMeelee = this.attackRange > 200;
 
     this.health = ddragonStats.hp;

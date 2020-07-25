@@ -32,7 +32,7 @@ export default class MoveState extends PlayerState {
       abilityCommand
     );
 
-    if (ability.canCast()) {
+    if (ability && ability.canCast()) {
       return new AbilityState(this.champion, ability, abilityCommand.target);
     }
 
@@ -64,7 +64,7 @@ export default class MoveState extends PlayerState {
 
     const targetIsEnemy = typeof this.target === "string";
 
-    const attackRange = this.champion.stats!.getAttackRange();
+    const attackRange = this.champion.stats!.attackRange.get();
 
     const totalDistance = getDistance(targetPos, this.champion.position);
 

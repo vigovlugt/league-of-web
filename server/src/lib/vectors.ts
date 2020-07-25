@@ -18,3 +18,19 @@ export function normalize(a: IVector2) {
   const length = getLength(a);
   return { x: a.x / length, y: a.y / length };
 }
+
+export function multiplyVector(a: IVector2, b: number) {
+  return { x: a.x * b, y: a.y * b };
+}
+
+export function constrainRange(
+  vector: IVector2,
+  origin: IVector2,
+  range: number
+) {
+  if (getDistance(vector, origin) > range) {
+    const normalized = normalize(vector);
+    return multiplyVector(normalized, range);
+  }
+  return vector;
+}

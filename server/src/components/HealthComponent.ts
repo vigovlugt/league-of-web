@@ -1,5 +1,6 @@
 import Component from "./Component";
 import GameObject from "../entities/GameObject";
+import ShieldComponent from "./ShieldComponent";
 
 export default class HealthComponent extends Component {
   public maxHealth: number;
@@ -13,6 +14,12 @@ export default class HealthComponent extends Component {
 
   public onDamage(source: GameObject, damage: number) {
     if (this.dead) return;
+
+    const shieldComponent = this.gameObject.getComponent(ShieldComponent);
+    if (shieldComponent) {
+      // First subtract damage from shields
+      damage = shieldComponent.onDamage(source, damage);
+    }
 
     this.health -= damage;
     if (this.health <= 0) {

@@ -1,13 +1,14 @@
 import Component from "./Component";
 import GameObject from "../entities/GameObject";
 import HealthComponent from "./HealthComponent";
+import Stat from "../models/stats/Stat";
 
 export default class AttackComponent extends Component {
-  protected damage: number;
+  protected damage: Stat;
 
   public attackCooldown: number = 0;
 
-  constructor(go: GameObject, damage: number) {
+  constructor(go: GameObject, damage: Stat) {
     super(go);
     this.damage = damage;
   }
@@ -23,7 +24,7 @@ export default class AttackComponent extends Component {
 
     const healthComponent = go.getComponent(HealthComponent);
     if (healthComponent) {
-      healthComponent.onDamage(this.gameObject, this.damage);
+      healthComponent.onDamage(this.gameObject, this.damage.get());
     }
   }
 

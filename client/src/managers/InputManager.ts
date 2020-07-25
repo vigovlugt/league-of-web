@@ -26,7 +26,7 @@ export default class InputManager {
     this.effectManager = effectManager;
     this.gameObjectManager = gameObjectManager;
 
-    this.interaction = new InteractionManager(app.renderer);
+    this.interaction = this.app.renderer.plugins.interaction;
 
     this.interaction.on("rightdown", (event: InteractionEvent) =>
       this.onRightClick(event)

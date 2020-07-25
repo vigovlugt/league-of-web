@@ -3,15 +3,16 @@ import GameObject from "../entities/GameObject";
 import IVector2 from "../interfaces/IVector";
 import { getDirection, normalize, getDistance } from "../lib/vectors";
 import Target from "../types/Target";
+import Stat from "../models/stats/Stat";
 
 export default class MoveComponent extends Component {
-  private speed: number;
+  private speed: Stat;
 
   private target: Target = null;
 
   private direction: IVector2 | null = null;
 
-  constructor(go: GameObject, speed: number) {
+  constructor(go: GameObject, speed: Stat) {
     super(go);
     this.speed = speed;
   }
@@ -46,8 +47,8 @@ export default class MoveComponent extends Component {
     if (this.direction == null) return { x: 0, y: 0 };
 
     return {
-      x: this.direction.x * this.speed * delta,
-      y: this.direction.y * this.speed * delta,
+      x: this.direction.x * this.speed.get() * delta,
+      y: this.direction.y * this.speed.get() * delta,
     };
   }
 
@@ -58,12 +59,13 @@ export default class MoveComponent extends Component {
     const direction = getDirection(this.gameObject.position, targetPosition);
     const normalized = normalize(direction);
 
-    let translationX = this.speed * delta * normalized.x;
+    let translationX = this.speed.get() * delta * normalized.x;
     // Do not overshoot target
     if (Math.abs(translationX) > Math.abs(direction.x)) {
       translationX = direction.x;
     }
-    let translationY = this.speed * delta * normalized.y;
+
+    let translationY = this.speed.get() * delta * normalized.y;
     if (Math.abs(translationY) > Math.abs(direction.y)) {
       translationY = direction.y;
     }
@@ -103,6 +105,7 @@ export default class MoveComponent extends Component {
 
     if (distance < 0.1) {
       this.setTarget(null);
+      this.emit("ARRIVE");
       return true;
     }
 

@@ -1,12 +1,10 @@
 import Champion from "../entities/Champion";
 import NetworkManager from "./NetworkManager";
-import WebSocket, { Data } from "ws";
 import GameObjectManager from "./GameObjectManager";
 import DataManager from "./DataManager";
-import { IncomingMessage } from "http";
 import ChampionManager from "./ChampionManager";
 
-const TICKS = 64;
+const TICKS = 60;
 
 export default class GameManager {
   public static instance: GameManager;

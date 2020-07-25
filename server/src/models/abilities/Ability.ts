@@ -8,21 +8,24 @@ export enum AbilityTargetType {
   NONE,
 }
 
-export default class Ability {
-  private cooldown: number;
-  private currentCooldown: number = 0;
+export interface IAbility {
+  cooldown: number;
+  castTime: number;
+  targetType: AbilityTargetType;
+}
 
+export default class Ability implements IAbility {
+  public champion: Champion;
+
+  public cooldown: number;
   public castTime: number;
-
   public targetType: AbilityTargetType;
 
-  public champion: Champion;
+  private currentCooldown: number = 0;
 
   constructor(
     champion: Champion,
-    cooldown: number,
-    castTime: number,
-    targetType: AbilityTargetType
+    { cooldown, castTime, targetType }: IAbility
   ) {
     this.champion = champion;
     this.cooldown = cooldown;
@@ -35,6 +38,10 @@ export default class Ability {
   }
 
   onCast(target: Target) {
+    this.currentCooldown = this.cooldown;
+  }
+
+  setCooldown() {
     this.currentCooldown = this.cooldown;
   }
 

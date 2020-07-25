@@ -1,7 +1,6 @@
 import WebSocket from "ws";
 import GameObject from "./GameObject";
-import IVector2 from "../interfaces/IVector";
-import PlayerStats from "../models/stats/PlayerStats";
+import ChampionStats from "../models/stats/ChampionStats";
 import HealthComponent from "../components/HealthComponent";
 import AttackComponent from "../components/AttackComponent";
 import MoveComponent from "../components/MoveComponent";
@@ -10,15 +9,17 @@ import AbilityComponent from "../components/AbilityComponent";
 import NetworkComponent from "../components/NetworkComponent";
 import ChampionStateComponent from "../components/ChampionStateComponent";
 import CollisionComponent from "../components/CollisionComponent";
+import ShieldComponent from "../components/ShieldComponent";
 
 export default class Champion extends GameObject {
   public name: string = "";
   public champion: string | null = null;
-  public stats: PlayerStats | null = null;
+  public stats: ChampionStats;
 
   moveComponent: MoveComponent;
   collisionComponent: CollisionComponent;
   healthComponent: HealthComponent;
+  shieldComponent: ShieldComponent;
   attackComponent: AttackComponent;
   abilityComponent: AbilityComponent;
   networkComponent: NetworkComponent;
@@ -33,22 +34,23 @@ export default class Champion extends GameObject {
     super("CHAMPION", { x: 0, y: 0 });
 
     this.name = name;
-    this.stats = new PlayerStats(champion);
+    this.stats = new ChampionStats(champion);
 
     this.moveComponent = this.addComponent(
-      new MoveComponent(this, this.stats.getMovementSpeed())
+      new MoveComponent(this, this.stats.movementSpeed)
     );
     this.healthComponent = this.addComponent(
       new HealthComponent(this, this.stats.base.health)
     );
+    this.shieldComponent = this.addComponent(new ShieldComponent(this));
 
     if (this.stats.base.attackRange > 200) {
       this.attackComponent = this.addComponent(
-        new RangedAttackComponent(this, this.stats.getAttackDamage())
+        new RangedAttackComponent(this, this.stats.attackDamage)
       );
     } else {
       this.attackComponent = this.addComponent(
-        new AttackComponent(this, this.stats.getAttackDamage())
+        new AttackComponent(this, this.stats.attackDamage)
       );
     }
 
@@ -66,6 +68,12 @@ export default class Champion extends GameObject {
 
     this.position.x = Math.random() * 1000;
     this.position.y = Math.random() * 700;
+  }
+
+  update(delta: number) {
+    super.update(delta);
+
+    this.stats.update(delta);
   }
 
   serialize() {

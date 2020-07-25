@@ -13,6 +13,8 @@ export default class Champion extends GameObject {
   public health: number;
   public maxHealth: number;
 
+  public shield: number;
+
   private healthBar: Healthbar;
 
   targetable = true;
@@ -25,6 +27,7 @@ export default class Champion extends GameObject {
     this.isLocalPlayer = isLocalPlayer;
     this.health = go.health;
     this.maxHealth = go.maxHealth;
+    this.shield = go.shield;
 
     const graphics = new Graphics();
     let color = 0xffffff;
@@ -43,12 +46,11 @@ export default class Champion extends GameObject {
 
     const name = new Text(this.name, {
       fontFamily: "VT323, Arial",
-      fontSize: 16,
+      fontSize: 26,
       fill: 0xffffff,
-      align: "center",
     });
+    setPivotCenter(name);
     name.y -= 105;
-    name.x -= 25;
 
     graphics.addChild(name);
     this.healthBar = new Healthbar(this);
@@ -57,9 +59,14 @@ export default class Champion extends GameObject {
   sync(player: IChampion) {
     super.sync(player);
 
-    if (this.health != player.health || this.maxHealth != player.maxHealth) {
+    if (
+      this.health != player.health ||
+      this.maxHealth != player.maxHealth ||
+      this.shield != player.shield
+    ) {
       this.health = player.health;
       this.maxHealth = player.maxHealth;
+      this.shield = player.shield;
       this.healthBar.sync();
     }
   }

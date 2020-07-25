@@ -3,3 +3,7 @@ html {
   margin: 0;
   overflow: hidden;
 }
+
+canvas {
+  cursor: url("/assets/cursors/hover_precise.png"), auto !important;
+}

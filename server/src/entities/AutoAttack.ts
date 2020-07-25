@@ -2,6 +2,7 @@ import GameObject from "./GameObject";
 import IVector2 from "../interfaces/IVector";
 import MoveComponent from "../components/MoveComponent";
 import HealthComponent from "../components/HealthComponent";
+import Stat from "../models/stats/Stat";
 
 const SPEED = 1000;
 
@@ -19,7 +20,7 @@ export default class AutoAttack extends GameObject {
     this.target = target;
     this.damage = damage;
 
-    this.moveComponent = new MoveComponent(this, SPEED);
+    this.moveComponent = new MoveComponent(this, new Stat(SPEED));
     this.addComponent(this.moveComponent);
     this.moveComponent.setTarget(target);
   }

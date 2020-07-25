@@ -26,9 +26,10 @@ export default class GameManager {
     this.app = new Application({
       width: window.innerWidth,
       height: window.innerHeight,
+      backgroundColor: 0x1e1e1e,
     });
 
-    // this.app.stage.scale.set(0.5);
+    this.app.stage.scale.set(0.75);
 
     element.appendChild(this.app.view);
 

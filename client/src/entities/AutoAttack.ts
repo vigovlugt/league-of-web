@@ -9,8 +9,8 @@ export default class AutoAttack extends GameObject {
 
     const graphics = new Graphics();
 
-    graphics.lineStyle(1, 0, 1);
-    graphics.beginFill(0xffffff);
+    graphics.lineStyle(3, 0xffffff, 1);
+    graphics.beginFill(0, 0);
     graphics.drawCircle(0, 0, 20);
     graphics.endFill();
 

@@ -16,7 +16,7 @@ enum AttackStateType {
   WINDDOWN,
 }
 
-const WINDUP_MULITPLIER = 0.3;
+const WINDUP_MULITPLIER = 0.15;
 const WINDDOWN_MULTIPLIER = 0.3;
 
 export default class AttackState extends PlayerState {
@@ -49,7 +49,7 @@ export default class AttackState extends PlayerState {
       abilityCommand
     );
 
-    if (ability.canCast()) {
+    if (ability && ability.canCast()) {
       return new AbilityState(this.champion, ability, abilityCommand.target);
     }
 

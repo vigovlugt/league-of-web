@@ -1,7 +1,6 @@
 import IGameObject from "../interfaces/IGameObject";
 import GameObject from "./GameObject";
 import { Graphics } from "pixi.js";
-import setPivotCenter from "../utils/sprite";
 
 export default class Projectile extends GameObject {
   constructor(go: IGameObject) {
@@ -9,8 +8,8 @@ export default class Projectile extends GameObject {
 
     const graphics = new Graphics();
 
-    graphics.lineStyle(1, 0, 1);
-    graphics.beginFill(0xffffff);
+    graphics.lineStyle(3, 0xffffff, 0.75);
+    graphics.beginFill(0, 0);
     graphics.drawCircle(0, 0, go.radius!);
     graphics.endFill();
 

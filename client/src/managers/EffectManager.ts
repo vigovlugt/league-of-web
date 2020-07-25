@@ -18,7 +18,7 @@ export default class EffectManager {
 
     this.app.stage.addChild(graphics);
 
-    const animate = (delta) => {
+    const animate = (delta: number) => {
       const ms = delta / settings.TARGET_FPMS;
       graphics.scale.set(graphics.scale.x - ms / (seconds * 1000));
     };

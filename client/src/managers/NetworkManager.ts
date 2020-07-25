@@ -1,3 +1,5 @@
+import GameManager from "./GameManager";
+
 interface IEventListener {
   eventType: string;
   execute: Function;

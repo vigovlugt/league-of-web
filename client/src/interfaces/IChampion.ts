@@ -5,4 +5,5 @@ export default interface IChampion extends IGameObject {
   champion: string;
   health: number;
   maxHealth: number;
+  shield: number;
 }
