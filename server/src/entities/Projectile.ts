@@ -1,11 +1,12 @@
 import GameObject from "./GameObject";
 import MoveComponent from "../components/MoveComponent";
 import IVector2 from "../interfaces/IVector";
-import { getDistance, constrainRange } from "../lib/vectors";
+import { getDistance, constrainRange } from "../utils/vectors";
 import GameManager from "../managers/GameManager";
-import CollisionComponent from "../components/CollisionComponent";
 import Stat from "../models/stats/Stat";
 import HealthComponent from "../components/HealthComponent";
+import BodyComponent from "../components/BodyComponent";
+import { Bodies } from "matter-js";
 
 export interface IProjectile {
   radius: number;
@@ -21,8 +22,8 @@ export default class Projectile extends GameObject implements IProjectile {
   // Direction or target
   public vector: IVector2;
 
+  protected bodyComponent: BodyComponent;
   protected moveComponent: MoveComponent;
-  protected collisionComponent: CollisionComponent;
 
   public radius: number;
   public speed: number;
@@ -62,17 +63,17 @@ export default class Projectile extends GameObject implements IProjectile {
     this.collides = collides;
     this.collidesWithSource = collidesWithSource;
 
-    this.moveComponent = new MoveComponent(this, new Stat(this.speed));
-    this.addComponent(this.moveComponent);
+    this.bodyComponent = this.addComponent(
+      new BodyComponent(this, Bodies.circle(0, 0, radius))
+    );
+    this.moveComponent = this.addComponent(
+      new MoveComponent(this, this.bodyComponent, new Stat(this.speed))
+    );
     if (!targeted) {
       this.moveComponent.setDirection(this.vector);
     } else {
       this.moveComponent.setDirection(this.vector);
     }
-
-    this.collisionComponent = this.addComponent(
-      new CollisionComponent(this, this.radius)
-    );
   }
 
   update(delta: number) {
@@ -94,7 +95,7 @@ export default class Projectile extends GameObject implements IProjectile {
             (this.collidesWithSource ? true : go != this.source) &&
             !this.hitGameObjects.includes(go) &&
             go.getComponent(HealthComponent) != null &&
-            this.collisionComponent.isColliding(go)
+            this.bodyComponent.isColliding(go)
         );
 
       collidingGameObjects.forEach((go) => this.onCollide(go));

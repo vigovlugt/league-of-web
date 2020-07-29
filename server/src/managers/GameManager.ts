@@ -3,12 +3,14 @@ import NetworkManager from "./NetworkManager";
 import GameObjectManager from "./GameObjectManager";
 import DataManager from "./DataManager";
 import ChampionManager from "./ChampionManager";
+import PhysicsManager from "./PhysicsManager";
 
 const TICKS = 60;
 
 export default class GameManager {
   public static instance: GameManager;
 
+  public static physicsManager: PhysicsManager;
   public static networkManager: NetworkManager;
   public static gameObjectManager: GameObjectManager;
   public static dataManager: DataManager;
@@ -23,6 +25,7 @@ export default class GameManager {
 
     await this.dataManager.loadData();
 
+    this.physicsManager = new PhysicsManager();
     this.networkManager = new NetworkManager();
     this.gameObjectManager = new GameObjectManager();
     this.championManager = new ChampionManager(this.networkManager);
@@ -40,6 +43,8 @@ export default class GameManager {
   }
 
   private static update(delta: number) {
+    this.gameObjectManager.getAll().forEach((go) => go.fixedUpdate(delta));
+    this.physicsManager.update(delta);
     this.gameObjectManager.getAll().forEach((go) => go.update(delta));
 
     this.sendState();

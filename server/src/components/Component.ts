@@ -9,6 +9,8 @@ export default class Component extends EventEmitter {
     this.gameObject = go;
   }
 
+  fixedUpdate(delta: number) {}
+
   update(delta: number) {}
 
   serialize(): Object {

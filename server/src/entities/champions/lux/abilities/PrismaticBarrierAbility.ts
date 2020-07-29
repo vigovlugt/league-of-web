@@ -4,7 +4,7 @@ import Ability, {
 import Target from "../../../../types/Target";
 import Champion from "../../../Champion";
 import LightBinding from "./LightBinding";
-import { getDirection } from "../../../../lib/vectors";
+import { getDirection } from "../../../../utils/vectors";
 import IVector2 from "../../../../interfaces/IVector";
 import PrismaticBarrier from "./PrismaticBarrier";
 

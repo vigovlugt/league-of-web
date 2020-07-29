@@ -3,6 +3,8 @@ import IVector2 from "../interfaces/IVector";
 import MoveComponent from "../components/MoveComponent";
 import HealthComponent from "../components/HealthComponent";
 import Stat from "../models/stats/Stat";
+import BodyComponent from "../components/BodyComponent";
+import { Bodies } from "matter-js";
 
 const SPEED = 1000;
 
@@ -11,6 +13,7 @@ export default class AutoAttack extends GameObject {
   private target: GameObject;
   private damage: number;
 
+  private bodyComponent: BodyComponent;
   private moveComponent: MoveComponent;
 
   constructor(source: GameObject, target: GameObject, damage: number) {
@@ -19,8 +22,14 @@ export default class AutoAttack extends GameObject {
     this.source = source;
     this.target = target;
     this.damage = damage;
-
-    this.moveComponent = new MoveComponent(this, new Stat(SPEED));
+    this.bodyComponent = this.addComponent(
+      new BodyComponent(this, Bodies.circle(0, 0, 10, { isSensor: true }))
+    );
+    this.moveComponent = new MoveComponent(
+      this,
+      this.bodyComponent,
+      new Stat(SPEED)
+    );
     this.addComponent(this.moveComponent);
     this.moveComponent.setTarget(target);
   }

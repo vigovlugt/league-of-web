@@ -38,6 +38,10 @@ export default class GameObject {
     return component as T;
   }
 
+  public fixedUpdate(delta: number) {
+    this.components.forEach((c) => c.fixedUpdate(delta));
+  }
+
   public update(delta: number) {
     this.components.forEach((c) => c.update(delta));
   }

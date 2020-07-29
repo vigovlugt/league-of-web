@@ -3,7 +3,7 @@ import Ability, {
 } from "../../../../models/abilities/Ability";
 import Target from "../../../../types/Target";
 import Champion from "../../../Champion";
-import { constrainRange } from "../../../../lib/vectors";
+import { constrainRange } from "../../../../utils/vectors";
 import IVector2 from "../../../../interfaces/IVector";
 import LucentSingularity from "./LucentSignularity";
 

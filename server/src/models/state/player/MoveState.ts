@@ -7,7 +7,7 @@ import IVector2 from "../../../interfaces/IVector";
 import GameManager from "../../../managers/GameManager";
 import IdleState from "./IdleState";
 import AttackState from "./AttackState";
-import { getDistance } from "../../../lib/vectors";
+import { getDistance } from "../../../utils/vectors";
 import MoveComponent from "../../../components/MoveComponent";
 import AbilityState from "./AbilityState";
 

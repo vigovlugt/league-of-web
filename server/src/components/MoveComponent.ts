@@ -1,19 +1,24 @@
 import Component from "./Component";
 import GameObject from "../entities/GameObject";
 import IVector2 from "../interfaces/IVector";
-import { getDirection, normalize, getDistance } from "../lib/vectors";
+import { getDirection, normalize, getDistance } from "../utils/vectors";
 import Target from "../types/Target";
 import Stat from "../models/stats/Stat";
+import BodyComponent from "./BodyComponent";
+import { Body } from "matter-js";
 
 export default class MoveComponent extends Component {
+  private bodyComponent: BodyComponent;
+
   private speed: Stat;
 
   private target: Target = null;
 
   private direction: IVector2 | null = null;
 
-  constructor(go: GameObject, speed: Stat) {
+  constructor(go: GameObject, bodyComponent: BodyComponent, speed: Stat) {
     super(go);
+    this.bodyComponent = bodyComponent;
     this.speed = speed;
   }
 
@@ -73,7 +78,7 @@ export default class MoveComponent extends Component {
     return { x: translationX, y: translationY };
   }
 
-  public update(delta: number) {
+  public fixedUpdate(delta: number) {
     let translation;
     if (this.target != null) {
       translation = this.getTargetTranslation(delta);
@@ -85,8 +90,7 @@ export default class MoveComponent extends Component {
       return;
     }
 
-    this.gameObject.position.x += translation.x;
-    this.gameObject.position.y += translation.y;
+    Body.translate(this.bodyComponent.body, translation);
 
     if (this.target != null) {
       this.checkAtTarget();

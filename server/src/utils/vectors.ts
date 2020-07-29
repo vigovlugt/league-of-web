@@ -16,6 +16,9 @@ export function getLength(a: IVector2) {
 
 export function normalize(a: IVector2) {
   const length = getLength(a);
+  if (length === 0) {
+    return { x: 0, y: 0 };
+  }
   return { x: a.x / length, y: a.y / length };
 }
 

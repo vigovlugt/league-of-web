@@ -8,22 +8,23 @@ import RangedAttackComponent from "../components/RangedAttackComponent";
 import AbilityComponent from "../components/AbilityComponent";
 import NetworkComponent from "../components/NetworkComponent";
 import ChampionStateComponent from "../components/ChampionStateComponent";
-import CollisionComponent from "../components/CollisionComponent";
 import ShieldComponent from "../components/ShieldComponent";
+import BodyComponent from "../components/BodyComponent";
+import { Bodies } from "matter-js";
 
 export default class Champion extends GameObject {
   public name: string = "";
   public champion: string | null = null;
   public stats: ChampionStats;
 
-  moveComponent: MoveComponent;
-  collisionComponent: CollisionComponent;
-  healthComponent: HealthComponent;
-  shieldComponent: ShieldComponent;
-  attackComponent: AttackComponent;
-  abilityComponent: AbilityComponent;
-  networkComponent: NetworkComponent;
-  stateComponent: ChampionStateComponent;
+  public moveComponent: MoveComponent;
+  public bodyComponent: BodyComponent;
+  public healthComponent: HealthComponent;
+  public shieldComponent: ShieldComponent;
+  public attackComponent: AttackComponent;
+  public abilityComponent: AbilityComponent;
+  public networkComponent: NetworkComponent;
+  public stateComponent: ChampionStateComponent;
 
   constructor(
     champion: string,
@@ -36,8 +37,12 @@ export default class Champion extends GameObject {
     this.name = name;
     this.stats = new ChampionStats(champion);
 
+    this.bodyComponent = this.addComponent(
+      new BodyComponent(this, Bodies.circle(0, 0, radius))
+    );
+
     this.moveComponent = this.addComponent(
-      new MoveComponent(this, this.stats.movementSpeed)
+      new MoveComponent(this, this.bodyComponent, this.stats.movementSpeed)
     );
     this.healthComponent = this.addComponent(
       new HealthComponent(this, this.stats.base.health)
@@ -53,10 +58,6 @@ export default class Champion extends GameObject {
         new AttackComponent(this, this.stats.attackDamage)
       );
     }
-
-    this.collisionComponent = this.addComponent(
-      new CollisionComponent(this, radius)
-    );
 
     this.abilityComponent = this.addComponent(new AbilityComponent(this, []));
 
