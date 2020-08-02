@@ -1,6 +1,7 @@
 import Component from "./Component";
 import GameObject from "../entities/GameObject";
 import { Body, Query } from "matter-js";
+import GameManager from "../managers/GameManager";
 
 export default class BodyComponent extends Component {
   public body: Body;
@@ -11,11 +12,19 @@ export default class BodyComponent extends Component {
     Body.setPosition(this.body, this.gameObject.position);
 
     this.body.frictionAir = 1;
+
+    GameManager.physicsManager.addBody(this.body);
   }
 
   update() {
     this.gameObject.position.x = this.body.position.x;
     this.gameObject.position.y = this.body.position.y;
+  }
+
+  getCollidingGameObjects() {
+    return GameManager.gameObjectManager
+      .getAll()
+      .filter((go) => this.isColliding(go));
   }
 
   isColliding(go: GameObject) {

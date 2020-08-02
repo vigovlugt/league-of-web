@@ -64,7 +64,7 @@ export default class Projectile extends GameObject implements IProjectile {
     this.collidesWithSource = collidesWithSource;
 
     this.bodyComponent = this.addComponent(
-      new BodyComponent(this, Bodies.circle(0, 0, radius))
+      new BodyComponent(this, Bodies.circle(0, 0, radius, { isSensor: true }))
     );
     this.moveComponent = this.addComponent(
       new MoveComponent(this, this.bodyComponent, new Stat(this.speed))

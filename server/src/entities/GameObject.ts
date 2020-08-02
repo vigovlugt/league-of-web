@@ -2,8 +2,9 @@ import { v4 as uuidv4 } from "uuid";
 import GameManager from "../managers/GameManager";
 import IVector2 from "../interfaces/IVector";
 import Component from "../components/Component";
+import { EventEmitter } from "events";
 
-export default class GameObject {
+export default class GameObject extends EventEmitter {
   public id: string;
   public type: string;
 
@@ -14,6 +15,7 @@ export default class GameObject {
   protected spawned: boolean = false;
 
   constructor(type: string, position: IVector2) {
+    super();
     this.id = uuidv4();
 
     this.type = type;

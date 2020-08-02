@@ -12,6 +12,7 @@ export interface IAbility {
   cooldown: number;
   castTime: number;
   targetType: AbilityTargetType;
+  oneCast?: boolean;
 }
 
 export default class Ability implements IAbility {
@@ -20,17 +21,20 @@ export default class Ability implements IAbility {
   public cooldown: number;
   public castTime: number;
   public targetType: AbilityTargetType;
+  public oneCast: boolean;
 
   private currentCooldown: number = 0;
 
   constructor(
     champion: Champion,
-    { cooldown, castTime, targetType }: IAbility
+    { cooldown, castTime, targetType, oneCast = true }: IAbility
   ) {
     this.champion = champion;
+
     this.cooldown = cooldown;
     this.castTime = castTime;
     this.targetType = targetType;
+    this.oneCast = oneCast;
   }
 
   canCast() {
@@ -38,7 +42,9 @@ export default class Ability implements IAbility {
   }
 
   onCast(target: Target) {
-    this.currentCooldown = this.cooldown;
+    if (this.oneCast) {
+      this.currentCooldown = this.cooldown;
+    }
   }
 
   setCooldown() {
@@ -48,6 +54,11 @@ export default class Ability implements IAbility {
   update(delta: number) {
     if (this.currentCooldown > 0) {
       this.currentCooldown -= delta;
+      if (this.currentCooldown <= 0) {
+        this.onCooldownEnd();
+      }
     }
   }
+
+  onCooldownEnd() {}
 }
